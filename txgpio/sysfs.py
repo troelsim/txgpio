@@ -1,5 +1,6 @@
 import os.path
 import platform
+from retry import retry
 from twisted.python import log
 try:
     platform.linux_distribution()
@@ -102,6 +103,7 @@ class GPIO(abstract.FileDescriptor, object):
         gpio_value_path = os.path.join(self.sysfs_gpio_node_dir, 'value')
         return open(gpio_value_path, mode)
 
+    @retry(IOError, tries=3, delay=0.02, backoff=5)
     def _configure_option(self, gpio_dir, variable, value, options):
         if value is not None:
             value = value.lower()
